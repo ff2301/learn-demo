@@ -754,8 +754,8 @@ nav {
 .maze-joystick-overlay {
   position: absolute;
   z-index: 4;
-  bottom: max(12px, 4%);
-  left: max(12px, 4%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .maze-round-overlay {
@@ -1027,11 +1027,6 @@ nav {
 
   .maze-game-stage .maze-board-shell {
     width: min(100%, calc(100svh - 190px));
-  }
-
-  .maze-joystick-overlay {
-    bottom: max(8px, 3%);
-    left: max(8px, 3%);
   }
 
   .maze-round-panel {

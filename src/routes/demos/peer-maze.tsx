@@ -29,6 +29,7 @@ type NetworkMessage =
   | { type: "round-complete"; level: number }
   | { type: "hello" }
 type JoystickVector = { x: number; y: number }
+type FloatingStick = JoystickVector & { active: boolean; centerX: number; centerY: number }
 type ConnectionBadge = ReturnType<typeof getConnectionBadge>
 
 const CELL_WALL = "#"
@@ -36,6 +37,7 @@ const CELL_OPEN = "."
 const PLAYER_SPEED = 3.8
 const PLAYER_RADIUS = 0.28
 const BROADCAST_INTERVAL = 70
+const JOYSTICK_TRAVEL = 46
 const DIFFICULTIES: Array<{
   id: MazeDifficulty
   label: string
@@ -727,8 +729,17 @@ function MazeBoard({
   role: Role | null
   roundPhase: RoundPhase
 }) {
+  const boardRef = useRef<HTMLDivElement | null>(null)
+  const pointerIdRef = useRef<number | null>(null)
   const hostAxis = role === "host" ? localAxis : remoteAxis
   const guestAxis = role === "guest" ? localAxis : remoteAxis
+  const [stick, setStick] = useState<FloatingStick>({
+    active: false,
+    centerX: 0,
+    centerY: 0,
+    x: 0,
+    y: 0,
+  })
   const boardCells = useMemo(
     () =>
       game.cells.flatMap((row, rowIndex) =>
@@ -739,11 +750,87 @@ function MazeBoard({
       ),
     [game]
   )
+  const updateStickFromPointer = useCallback(
+    (clientX: number, clientY: number, centerX: number, centerY: number) => {
+      const board = boardRef.current
+
+      if (!board) {
+        return
+      }
+
+      const rect = board.getBoundingClientRect()
+      const rawX = clampAxis((clientX - rect.left - centerX) / JOYSTICK_TRAVEL)
+      const rawY = clampAxis((clientY - rect.top - centerY) / JOYSTICK_TRAVEL)
+      const length = Math.hypot(rawX, rawY)
+      const vector =
+        length > 1
+          ? {
+              x: rawX / length,
+              y: rawY / length,
+            }
+          : {
+              x: rawX,
+              y: rawY,
+            }
+
+      setStick({
+        active: true,
+        centerX,
+        centerY,
+        ...vector,
+      })
+      onStickChange(vector)
+    },
+    [onStickChange]
+  )
+
+  const resetStick = useCallback(() => {
+    pointerIdRef.current = null
+    setStick((current) => ({
+      ...current,
+      active: false,
+      x: 0,
+      y: 0,
+    }))
+    onStickChange({ x: 0, y: 0 })
+  }, [onStickChange])
 
   return (
     <div className="maze-board-shell">
       <div
         className="maze-board"
+        onPointerCancel={resetStick}
+        onPointerDown={(event) => {
+          if (roundPhase === "complete") {
+            return
+          }
+
+          const board = boardRef.current
+
+          if (!board) {
+            return
+          }
+
+          const rect = board.getBoundingClientRect()
+          const centerX = event.clientX - rect.left
+          const centerY = event.clientY - rect.top
+          pointerIdRef.current = event.pointerId
+          event.currentTarget.setPointerCapture(event.pointerId)
+          updateStickFromPointer(event.clientX, event.clientY, centerX, centerY)
+        }}
+        onPointerMove={(event) => {
+          if (pointerIdRef.current !== event.pointerId || !stick.active) {
+            return
+          }
+
+          updateStickFromPointer(event.clientX, event.clientY, stick.centerX, stick.centerY)
+        }}
+        onPointerUp={(event) => {
+          if (pointerIdRef.current === event.pointerId) {
+            resetStick()
+          }
+        }}
+        ref={boardRef}
         style={
           {
             "--maze-cols": game.width,
@@ -769,9 +856,7 @@ function MazeBoard({
             width: `${(0.76 / game.width) * 100}%`,
           }}
         />
-        <div className="maze-joystick-overlay">
-          <Joystick onChange={onStickChange} />
-        </div>
+        {stick.active ? <Joystick stick={stick} /> : null}
         {roundPhase === "complete" ? (
           <div className="maze-round-overlay">
             <div className="maze-round-panel">
@@ -830,68 +915,20 @@ function DifficultyPicker({
   )
 }
 
-function Joystick({ onChange }: { onChange: (value: JoystickVector) => void }) {
-  const padRef = useRef<HTMLDivElement | null>(null)
-  const [value, setValue] = useState<JoystickVector>({ x: 0, y: 0 })
-
-  const updateFromPointer = useCallback(
-    (clientX: number, clientY: number) => {
-      const pad = padRef.current
-
-      if (!pad) {
-        return
-      }
-
-      const rect = pad.getBoundingClientRect()
-      const centerX = rect.left + rect.width / 2
-      const centerY = rect.top + rect.height / 2
-      const radius = Math.min(rect.width, rect.height) / 2
-      const rawX = clampAxis((clientX - centerX) / radius)
-      const rawY = clampAxis((clientY - centerY) / radius)
-      const length = Math.hypot(rawX, rawY)
-      const nextValue =
-        length > 1
-          ? {
-              x: rawX / length,
-              y: rawY / length,
-            }
-          : {
-              x: rawX,
-              y: rawY,
-            }
-      setValue(nextValue)
-      onChange(nextValue)
-    },
-    [onChange]
-  )
-
-  const reset = useCallback(() => {
-    const nextValue = { x: 0, y: 0 }
-    setValue(nextValue)
-    onChange(nextValue)
-  }, [onChange])
-
+function Joystick({ stick }: { stick: FloatingStick }) {
   return (
-    <div className="joystick-wrap">
-      <div
-        className="joystick-pad"
-        onPointerCancel={reset}
-        onPointerDown={(event) => {
-          event.currentTarget.setPointerCapture(event.pointerId)
-          updateFromPointer(event.clientX, event.clientY)
-        }}
-        onPointerMove={(event) => {
-          if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-            updateFromPointer(event.clientX, event.clientY)
-          }
-        }}
-        onPointerUp={reset}
-        ref={padRef}
-      >
+    <div
+      className="maze-joystick-overlay"
+      style={{
+        left: `${stick.centerX}px`,
+        top: `${stick.centerY}px`,
+      }}
+    >
+      <div className="joystick-pad">
         <div
           className="joystick-thumb"
           style={{
-            transform: `translate(${value.x * 46}px, ${value.y * 46}px)`,
+            transform: `translate(${stick.x * JOYSTICK_TRAVEL}px, ${stick.y * JOYSTICK_TRAVEL}px)`,
           }}
         />
       </div>
