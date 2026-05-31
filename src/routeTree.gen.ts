@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DemosRayTracingRouteImport } from './routes/demos/ray-tracing'
+import { Route as DemosPeerMazeRouteImport } from './routes/demos/peer-maze'
 import { Route as DemosFractalRouteImport } from './routes/demos/fractal'
 import { Route as DemosCounterRouteImport } from './routes/demos/counter'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const DemosRayTracingRoute = DemosRayTracingRouteImport.update({
   id: '/demos/ray-tracing',
   path: '/demos/ray-tracing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemosPeerMazeRoute = DemosPeerMazeRouteImport.update({
+  id: '/demos/peer-maze',
+  path: '/demos/peer-maze',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemosFractalRoute = DemosFractalRouteImport.update({
@@ -39,12 +45,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/demos/counter': typeof DemosCounterRoute
   '/demos/fractal': typeof DemosFractalRoute
+  '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/demos/counter': typeof DemosCounterRoute
   '/demos/fractal': typeof DemosFractalRoute
+  '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
 }
 export interface FileRoutesById {
@@ -52,18 +60,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/demos/counter': typeof DemosCounterRoute
   '/demos/fractal': typeof DemosFractalRoute
+  '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/demos/counter' | '/demos/fractal' | '/demos/ray-tracing'
+  fullPaths:
+    | '/'
+    | '/demos/counter'
+    | '/demos/fractal'
+    | '/demos/peer-maze'
+    | '/demos/ray-tracing'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/demos/counter' | '/demos/fractal' | '/demos/ray-tracing'
+  to:
+    | '/'
+    | '/demos/counter'
+    | '/demos/fractal'
+    | '/demos/peer-maze'
+    | '/demos/ray-tracing'
   id:
     | '__root__'
     | '/'
     | '/demos/counter'
     | '/demos/fractal'
+    | '/demos/peer-maze'
     | '/demos/ray-tracing'
   fileRoutesById: FileRoutesById
 }
@@ -71,6 +91,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DemosCounterRoute: typeof DemosCounterRoute
   DemosFractalRoute: typeof DemosFractalRoute
+  DemosPeerMazeRoute: typeof DemosPeerMazeRoute
   DemosRayTracingRoute: typeof DemosRayTracingRoute
 }
 
@@ -88,6 +109,13 @@ declare module '@tanstack/react-router' {
       path: '/demos/ray-tracing'
       fullPath: '/demos/ray-tracing'
       preLoaderRoute: typeof DemosRayTracingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demos/peer-maze': {
+      id: '/demos/peer-maze'
+      path: '/demos/peer-maze'
+      fullPath: '/demos/peer-maze'
+      preLoaderRoute: typeof DemosPeerMazeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demos/fractal': {
@@ -111,6 +139,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DemosCounterRoute: DemosCounterRoute,
   DemosFractalRoute: DemosFractalRoute,
+  DemosPeerMazeRoute: DemosPeerMazeRoute,
   DemosRayTracingRoute: DemosRayTracingRoute,
 }
 export const routeTree = rootRouteImport

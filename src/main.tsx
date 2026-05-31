@@ -4,7 +4,9 @@ import "antd-mobile/es/global"
 import "./index.css"
 import { routeTree } from "./routeTree.gen"
 
-const router = createRouter({ routeTree })
+const basepath =
+  import.meta.env.BASE_URL === "/" ? "/" : import.meta.env.BASE_URL.replace(/\/$/, "")
+const router = createRouter({ routeTree, basepath })
 const rootElement = document.getElementById("root")
 
 if (!rootElement) {

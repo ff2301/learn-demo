@@ -15,6 +15,11 @@ const demoGroups = [
       { to: "/demos/ray-tracing", label: "Ray tracing demo", status: "Ready" },
     ],
   },
+  {
+    title: "Network play",
+    description: "Peer-to-peer demos for browser networking, shared state, and mobile controls.",
+    demos: [{ to: "/demos/peer-maze", label: "Peer maze co-op", status: "New" }],
+  },
 ] as const
 
 export const Route = createFileRoute("/")({
