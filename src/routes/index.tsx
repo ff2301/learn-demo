@@ -12,6 +12,7 @@ const demoGroups = [
     description: "GPU-rendered visual demos with interactive rendering controls.",
     demos: [
       { to: "/demos/fractal", label: "Fractal shader", status: "New" },
+      { to: "/demos/hourglass", label: "Sensor hourglass", status: "New" },
       { to: "/demos/ray-tracing", label: "Ray tracing demo", status: "Ready" },
     ],
   },

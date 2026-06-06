@@ -6,6 +6,7 @@ const navItems = [
   { to: "/", label: "Overview" },
   { to: "/demos/counter", label: "Counter demo" },
   { to: "/demos/fractal", label: "Fractal shader" },
+  { to: "/demos/hourglass", label: "Sensor hourglass" },
   { to: "/demos/peer-maze", label: "Peer maze co-op" },
   { to: "/demos/ray-tracing", label: "Ray tracing demo" },
 ] as const
