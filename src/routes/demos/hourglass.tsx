@@ -21,6 +21,11 @@ type Gravity = {
   y: number
 }
 
+type SensorSample = {
+  gravity: Gravity
+  time: number
+}
+
 type Direction = {
   dx: number
   dy: number
@@ -45,6 +50,7 @@ const topCap = 11
 const bottomCap = simHeight - 12
 const displayPaddingX = 24
 const displayPaddingY = 58
+const minimumProjectedGravity = 1.15
 const neighborDirections: readonly Direction[] = [
   { dx: 0, dy: 1 },
   { dx: 1, dy: 1 },
@@ -64,6 +70,7 @@ function HourglassDemo() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const sensorCleanupRef = useRef<(() => void) | null>(null)
+  const sensorSampleRef = useRef<SensorSample | null>(null)
   const gravityTargetRef = useRef<Gravity>({ x: 0, y: 1 })
   const resetRequestRef = useRef(0)
   const settingsRef = useRef({
@@ -166,8 +173,8 @@ function HourglassDemo() {
         resetSand()
       }
 
-      gravity.x += (gravityTargetRef.current.x - gravity.x) * 0.1
-      gravity.y += (gravityTargetRef.current.y - gravity.y) * 0.1
+      gravity.x += (gravityTargetRef.current.x - gravity.x) * 0.32
+      gravity.y += (gravityTargetRef.current.y - gravity.y) * 0.32
       normalizeGravity(gravity)
 
       if (!settingsRef.current.paused) {
@@ -221,25 +228,17 @@ function HourglassDemo() {
 
   async function enableSensors() {
     try {
-      if (!("DeviceOrientationEvent" in window)) {
+      if (!("DeviceMotionEvent" in window) && !("DeviceOrientationEvent" in window)) {
         setSensorState("unsupported")
         return
       }
 
-      const orientationConstructor =
-        window.DeviceOrientationEvent as unknown as PermissionAwareEventConstructor
       const motionConstructor = (
         "DeviceMotionEvent" in window ? window.DeviceMotionEvent : undefined
       ) as PermissionAwareEventConstructor | undefined
-
-      if (typeof orientationConstructor.requestPermission === "function") {
-        const permission = await orientationConstructor.requestPermission()
-
-        if (permission !== "granted") {
-          setSensorState("blocked")
-          return
-        }
-      }
+      const orientationConstructor = (
+        "DeviceOrientationEvent" in window ? window.DeviceOrientationEvent : undefined
+      ) as PermissionAwareEventConstructor | undefined
 
       if (typeof motionConstructor?.requestPermission === "function") {
         const permission = await motionConstructor.requestPermission()
@@ -250,16 +249,29 @@ function HourglassDemo() {
         }
       }
 
+      if (!motionConstructor && typeof orientationConstructor?.requestPermission === "function") {
+        const permission = await orientationConstructor.requestPermission()
+
+        if (permission !== "granted") {
+          setSensorState("blocked")
+          return
+        }
+      }
+
       sensorCleanupRef.current?.()
+      sensorSampleRef.current = null
 
       const handleOrientation = (event: DeviceOrientationEvent) => {
-        const beta = ((event.beta ?? 0) / 180) * Math.PI
-        const gamma = ((event.gamma ?? 0) / 90) * Math.PI * 0.5
-        gravityTargetRef.current = {
-          x: clamp(Math.sin(gamma), -1, 1),
-          y: clamp(Math.cos(beta), -1, 1),
+        if (sensorSampleRef.current && performance.now() - sensorSampleRef.current.time < 650) {
+          return
         }
-        normalizeGravity(gravityTargetRef.current)
+
+        const beta = event.beta ?? 0
+        const gamma = event.gamma ?? 0
+        applySensorGravity({
+          x: clamp(gamma / 45, -1, 1),
+          y: clamp(beta / 45, -1, 1),
+        })
       }
 
       const handleMotion = (event: DeviceMotionEvent) => {
@@ -269,12 +281,7 @@ function HourglassDemo() {
           return
         }
 
-        const shake = Math.hypot(acceleration.x ?? 0, acceleration.y ?? 0, acceleration.z ?? 0)
-
-        if (shake > 13.5) {
-          gravityTargetRef.current.x += clamp((acceleration.x ?? 0) * 0.006, -0.08, 0.08)
-          normalizeGravity(gravityTargetRef.current)
-        }
+        applySensorGravity(projectAccelerationToScreen(acceleration))
       }
 
       window.addEventListener("deviceorientation", handleOrientation)
@@ -293,6 +300,18 @@ function HourglassDemo() {
     sensorCleanupRef.current?.()
     sensorCleanupRef.current = null
     setSensorState("manual")
+  }
+
+  function applySensorGravity(sample: Gravity | null) {
+    if (!sample) {
+      return
+    }
+
+    gravityTargetRef.current = sample
+    sensorSampleRef.current = {
+      gravity: sample,
+      time: performance.now(),
+    }
   }
 
   return (
@@ -780,6 +799,21 @@ function normalizeGravity(gravity: Gravity) {
   const length = Math.hypot(gravity.x, gravity.y) || 1
   gravity.x /= length
   gravity.y /= length
+}
+
+function projectAccelerationToScreen(acceleration: DeviceMotionEventAcceleration): Gravity | null {
+  const projectedX = acceleration.x ?? 0
+  const projectedY = -(acceleration.y ?? 0)
+  const magnitude = Math.hypot(projectedX, projectedY)
+
+  if (magnitude < minimumProjectedGravity) {
+    return null
+  }
+
+  return {
+    x: projectedX / magnitude,
+    y: projectedY / magnitude,
+  }
 }
 
 function hash2(a: number, b: number) {
