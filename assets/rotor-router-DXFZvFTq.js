@@ -1,4 +1,4 @@
-import{_ as e,i as t,l as n,m as r,p as i,s as a,u as o}from"./index-D3uWL06c.js";var s=e(r()),c=i(),l=16,u=4e3,d=8,f=d*4,p={copyDst:8,copySrc:4,mapRead:1,storage:128,uniform:64},m={read:1},h=`
+import{_ as e,i as t,l as n,m as r,p as i,s as a,u as o}from"./index-k7PFuL3V.js";var s=e(r()),c=i(),l=16,u=4e3,d=8,f=d*4,p={copyDst:8,copySrc:4,mapRead:1,storage:128,uniform:64},m={read:1},h=`
 struct SimParams {
   width: u32,
   height: u32,
