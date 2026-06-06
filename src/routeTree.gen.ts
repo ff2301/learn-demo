@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DemosRotorRouterRouteImport } from './routes/demos/rotor-router'
 import { Route as DemosRayTracingRouteImport } from './routes/demos/ray-tracing'
 import { Route as DemosPeerMazeRouteImport } from './routes/demos/peer-maze'
 import { Route as DemosHourglassRouteImport } from './routes/demos/hourglass'
@@ -19,6 +20,11 @@ import { Route as DemosCounterRouteImport } from './routes/demos/counter'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemosRotorRouterRoute = DemosRotorRouterRouteImport.update({
+  id: '/demos/rotor-router',
+  path: '/demos/rotor-router',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemosRayTracingRoute = DemosRayTracingRouteImport.update({
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/demos/hourglass': typeof DemosHourglassRoute
   '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
+  '/demos/rotor-router': typeof DemosRotorRouterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/demos/hourglass': typeof DemosHourglassRoute
   '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
+  '/demos/rotor-router': typeof DemosRotorRouterRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -71,6 +79,7 @@ export interface FileRoutesById {
   '/demos/hourglass': typeof DemosHourglassRoute
   '/demos/peer-maze': typeof DemosPeerMazeRoute
   '/demos/ray-tracing': typeof DemosRayTracingRoute
+  '/demos/rotor-router': typeof DemosRotorRouterRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -81,6 +90,7 @@ export interface FileRouteTypes {
     | '/demos/hourglass'
     | '/demos/peer-maze'
     | '/demos/ray-tracing'
+    | '/demos/rotor-router'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -89,6 +99,7 @@ export interface FileRouteTypes {
     | '/demos/hourglass'
     | '/demos/peer-maze'
     | '/demos/ray-tracing'
+    | '/demos/rotor-router'
   id:
     | '__root__'
     | '/'
@@ -97,6 +108,7 @@ export interface FileRouteTypes {
     | '/demos/hourglass'
     | '/demos/peer-maze'
     | '/demos/ray-tracing'
+    | '/demos/rotor-router'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -106,6 +118,7 @@ export interface RootRouteChildren {
   DemosHourglassRoute: typeof DemosHourglassRoute
   DemosPeerMazeRoute: typeof DemosPeerMazeRoute
   DemosRayTracingRoute: typeof DemosRayTracingRoute
+  DemosRotorRouterRoute: typeof DemosRotorRouterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demos/rotor-router': {
+      id: '/demos/rotor-router'
+      path: '/demos/rotor-router'
+      fullPath: '/demos/rotor-router'
+      preLoaderRoute: typeof DemosRotorRouterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demos/ray-tracing': {
@@ -162,6 +182,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemosHourglassRoute: DemosHourglassRoute,
   DemosPeerMazeRoute: DemosPeerMazeRoute,
   DemosRayTracingRoute: DemosRayTracingRoute,
+  DemosRotorRouterRoute: DemosRotorRouterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

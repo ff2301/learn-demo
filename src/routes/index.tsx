@@ -14,6 +14,7 @@ const demoGroups = [
       { to: "/demos/fractal", label: "Fractal shader", status: "New" },
       { to: "/demos/hourglass", label: "Sensor hourglass", status: "New" },
       { to: "/demos/ray-tracing", label: "Ray tracing demo", status: "Ready" },
+      { to: "/demos/rotor-router", label: "Rotor-router field", status: "New" },
     ],
   },
   {

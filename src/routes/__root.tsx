@@ -9,6 +9,7 @@ const navItems = [
   { to: "/demos/hourglass", label: "Sensor hourglass" },
   { to: "/demos/peer-maze", label: "Peer maze co-op" },
   { to: "/demos/ray-tracing", label: "Ray tracing demo" },
+  { to: "/demos/rotor-router", label: "Rotor-router field" },
 ] as const
 
 export const Route = createRootRoute({

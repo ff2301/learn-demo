@@ -436,6 +436,118 @@ nav {
   font-weight: 800;
 }
 
+.rotor-demo {
+  position: relative;
+  min-height: calc(100svh - 96px);
+  margin: -48px;
+  overflow: hidden;
+  background: #020607;
+}
+
+.rotor-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: calc(100svh - 96px);
+}
+
+.rotor-panel {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: 18px;
+  width: min(390px, calc(100% - 36px));
+  border: 1px solid rgba(226, 232, 240, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+.rotor-panel .adm-card-header-title {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.rotor-panel .adm-card-body {
+  display: grid;
+  gap: 12px;
+}
+
+.rotor-panel.collapsed {
+  width: min(270px, calc(100% - 36px));
+}
+
+.rotor-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rotor-controls {
+  display: grid;
+  gap: 12px;
+}
+
+.rotor-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.rotor-stat-grid div {
+  display: grid;
+  gap: 3px;
+  min-height: 58px;
+  align-content: center;
+  border: 1px solid #dfe4eb;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 8px 10px;
+}
+
+.rotor-stat-grid span {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.rotor-stat-grid strong {
+  overflow: hidden;
+  color: #0f172a;
+  font-size: 0.92rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rotor-status {
+  display: inline-flex;
+  min-height: 24px;
+  align-items: center;
+  justify-self: start;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  padding: 0 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.rotor-status.running {
+  background: #dff5f1;
+  color: #0f766e;
+}
+
+.rotor-note {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .hourglass-demo {
   position: relative;
   min-height: calc(100svh - 96px);
@@ -560,7 +672,6 @@ nav {
   background: #fef2f2;
   color: #b91c1c;
 }
-
 
 .peer-maze-page {
   max-width: 1180px;
@@ -1090,6 +1201,30 @@ nav {
     max-height: none;
   }
 
+  .rotor-demo {
+    min-height: calc(100svh - 56px);
+    margin: -80px -18px -28px;
+  }
+
+  .rotor-canvas {
+    min-height: calc(100svh - 56px);
+  }
+
+  .rotor-panel {
+    top: auto;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    width: auto;
+    max-height: min(58svh, 480px);
+    overflow: auto;
+  }
+
+  .rotor-panel.collapsed {
+    width: auto;
+    max-height: none;
+  }
+
   .hourglass-demo {
     min-height: calc(100svh - 56px);
     margin: -80px -18px -28px;
@@ -1118,7 +1253,6 @@ nav {
   .hourglass-panel.collapsed .adm-card-header {
     padding: 8px 12px;
   }
-
 
   .maze-status-strip,
   .maze-layout,
