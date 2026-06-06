@@ -51,6 +51,7 @@ const bottomCap = simHeight - 12
 const displayPaddingX = 24
 const displayPaddingY = 58
 const minimumProjectedGravity = 1.15
+const statsUpdateInterval = 100
 const neighborDirections: readonly Direction[] = [
   { dx: 0, dy: 1 },
   { dx: 1, dy: 1 },
@@ -187,7 +188,7 @@ function HourglassDemo() {
 
       frameCount += 1
 
-      if (now - lastFpsTime > 350) {
+      if (now - lastFpsTime > statsUpdateInterval) {
         const fps = Math.round((frameCount * 1000) / Math.max(1, now - lastFpsTime))
         frameCount = 0
         lastFpsTime = now
@@ -802,8 +803,8 @@ function normalizeGravity(gravity: Gravity) {
 }
 
 function projectAccelerationToScreen(acceleration: DeviceMotionEventAcceleration): Gravity | null {
-  const projectedX = acceleration.x ?? 0
-  const projectedY = -(acceleration.y ?? 0)
+  const projectedX = -(acceleration.x ?? 0)
+  const projectedY = acceleration.y ?? 0
   const magnitude = Math.hypot(projectedX, projectedY)
 
   if (magnitude < minimumProjectedGravity) {
